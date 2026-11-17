@@ -307,3 +307,6 @@ The committed files contain placeholders only.
 ## Owner
 
 Built by [Durgesh Yadav](https://github.com/analyticsdurgesh) as a Snowflake, dbt, and analytics engineering portfolio project.
+
+python -m dbt.cli.main build --target duckdb --profiles-dir .
+python -m streamlit run dashboard/streamlit_app.py -- --duckdb

@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Airbnb Snowflake + dbt Analytics Project | Complete Project Guide</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --primary-light: #eef2ff;
+      --secondary: #0ea5e9;
+      --success: #10b981;
+      --success-light: #ecfdf5;
+      --warning: #f59e0b;
+      --warning-light: #fffbeb;
+      --danger: #ef4444;
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-card: #1e293b;
+      --surface-card-hover: #24344d;
+      --border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --code-bg: #090d16;
+      --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar Navigation */
+    aside.sidebar {
+      width: 290px;
+      background-color: #0b1120;
+      border-right: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 1.5rem 1rem;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand-icon {
+      background: linear-gradient(135deg, #4f46e5, #06b6d4);
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .brand-text h1 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.2;
+    }
+
+    .brand-text p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    nav.toc {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    nav.toc a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    nav.toc a:hover {
+      color: #fff;
+      background-color: var(--surface);
+    }
+
+    nav.toc a.active {
+      color: #fff;
+      background-color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* Main Content */
+    main.content {
+      flex: 1;
+      padding: 2.5rem 3.5rem;
+      max-width: 1100px;
+      overflow-y: auto;
+    }
+
+    /* Header Banner */
+    .hero {
+      background: linear-gradient(135deg, rgba(79, 70, 229, 0.15) 0%, rgba(14, 165, 233, 0.1) 100%);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .hero-badge-group {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.025em;
+    }
+
+    .badge-primary { background: rgba(79, 70, 229, 0.25); color: #a5b4fc; border: 1px solid rgba(129, 140, 248, 0.3); }
+    .badge-success { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(52, 211, 153, 0.3); }
+    .badge-secondary { background: rgba(14, 165, 233, 0.2); color: #7dd3fc; border: 1px solid rgba(56, 189, 248, 0.3); }
+    .badge-warning { background: rgba(245, 158, 11, 0.2); color: #fde68a; border: 1px solid rgba(251, 191, 36, 0.3); }
+
+    .hero h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.025em;
+    }
+
+    .hero p {
+      color: #cbd5e1;
+      font-size: 1.05rem;
+      line-height: 1.6;
+    }
+
+    /* Section Styling */
+    section {
+      margin-bottom: 3rem;
+      scroll-margin-top: 2rem;
+    }
+
+    h2 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    h3 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #e2e8f0;
+      margin: 1.5rem 0 0.75rem 0;
+    }
+
+    p {
+      color: #94a3b8;
+      margin-bottom: 1rem;
+    }
+
+    /* Cards & Grid */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.25rem;
+      margin: 1rem 0;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .card {
+      background-color: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      transition: border-color 0.2s ease;
+    }
+
+    .card:hover {
+      border-color: #475569;
+    }
+
+    .card h4 {
+      font-size: 1rem;
+      color: #fff;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    /* Architecture Visual Diagram */
+    .arch-flow {
+      background-color: #0b1120;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.75rem;
+      margin: 1.5rem 0;
+    }
+
+    .flow-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      position: relative;
+    }
+
+    .flow-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .flow-node {
+      flex: 1;
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid;
+    }
+
+    .flow-node.raw { background: rgba(14, 165, 233, 0.08); border-color: rgba(14, 165, 233, 0.4); }
+    .flow-node.staging { background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.4); }
+    .flow-node.intermediate { background: rgba(245, 158, 11, 0.08); border-color: rgba(245, 158, 11, 0.4); }
+    .flow-node.marts { background: rgba(99, 102, 241, 0.08); border-color: rgba(99, 102, 241, 0.4); }
+    .flow-node.bi { background: rgba(236, 72, 153, 0.08); border-color: rgba(236, 72, 153, 0.4); }
+
+    .node-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #fff;
+      margin-bottom: 0.25rem;
+    }
+
+    .node-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .flow-arrow-down {
+      text-align: center;
+      color: #64748b;
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+
+    /* Tab Controls */
+    .tab-container {
+      margin: 1.5rem 0;
+    }
+
+    .tab-nav {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      color: #fff;
+      background-color: var(--surface);
+    }
+
+    .tab-btn.active {
+      color: #fff;
+      background-color: var(--primary);
+    }
+
+    .tab-pane {
+      display: none;
+    }
+
+    .tab-pane.active {
+      display: block;
+    }
+
+    /* Code Snippets */
+    .code-block {
+      background-color: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin: 1rem 0;
+      overflow: hidden;
+    }
+
+    .code-header {
+      background-color: #111827;
+      padding: 0.5rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #1f2937;
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+    }
+
+    .copy-btn {
+      background-color: #1e293b;
+      color: #cbd5e1;
+      border: 1px solid #334155;
+      border-radius: 4px;
+      padding: 0.2rem 0.5rem;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background-color: #334155;
+      color: #fff;
+    }
+
+    pre {
+      padding: 1rem;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: #e2e8f0;
+    }
+
+    code {
+      font-family: var(--font-mono);
+    }
+
+    .inline-code {
+      background-color: rgba(255, 255, 255, 0.08);
+      padding: 0.15rem 0.35rem;
+      border-radius: 4px;
+      font-size: 0.85em;
+      color: #38bdf8;
+    }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      margin: 1.5rem 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.88rem;
+    }
+
+    th {
+      background-color: #111827;
+      color: #cbd5e1;
+      font-weight: 600;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #233044;
+      color: #94a3b8;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background-color: rgba(255, 255, 255, 0.02);
+      color: #f1f5f9;
+    }
+
+    /* Callout Boxes */
+    .callout {
+      border-left: 4px solid;
+      border-radius: 0 8px 8px 0;
+      padding: 1rem 1.25rem;
+      margin: 1.25rem 0;
+      background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    .callout-info { border-color: var(--secondary); background: rgba(14, 165, 233, 0.07); }
+    .callout-warning { border-color: var(--warning); background: rgba(245, 158, 11, 0.07); }
+    .callout-success { border-color: var(--success); background: rgba(16, 185, 129, 0.07); }
+
+    .callout-title {
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-bottom: 0.3rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .callout-info .callout-title { color: #38bdf8; }
+    .callout-warning .callout-title { color: #fbbf24; }
+    .callout-success .callout-title { color: #34d399; }
+
+    .callout p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: #cbd5e1;
+    }
+
+    /* Quick Links */
+    .file-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background-color: #1e293b;
+      border: 1px solid #334155;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: #93c5fd;
+      text-decoration: none;
+      margin: 0.2rem 0;
+    }
+
+    .file-pill:hover {
+      border-color: #60a5fa;
+      background-color: #24344d;
+    }
+
+    footer {
+      margin-top: 4rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">❄️</div>
+      <div class="brand-text">
+        <h1>Airbnb Analytics</h1>
+        <p>Snowflake + dbt Project</p>
+      </div>
+    </div>
+
+    <nav class="toc">
+      <a href="#overview" class="active">📌 Executive Overview</a>
+      <a href="#background">📖 Background & Dataset</a>
+      <a href="#architecture">🏗️ Architecture & Pipeline</a>
+      <a href="#dbt-layers">⚙️ dbt Model Layers</a>
+      <a href="#data-quality">🛡️ Testing & Data Quality</a>
+      <a href="#setup-guide">🚀 Step-by-Step Setup</a>
+      <a href="#commands">💻 Command Reference</a>
+      <a href="#dashboard">📊 Streamlit Dashboard</a>
+      <a href="#business-questions">💡 Business Insights</a>
+      <a href="#troubleshooting">🔧 Troubleshooting & FAQ</a>
+    </nav>
+  </aside>
+
+  <!-- Main Content Body -->
+  <main class="content">
+
+    <!-- Header Hero -->
+    <div class="hero">
+      <div class="hero-badge-group">
+        <span class="badge badge-primary">Analytics Engineering</span>
+        <span class="badge badge-secondary">Snowflake</span>
+        <span class="badge badge-success">dbt Core</span>
+        <span class="badge badge-warning">DuckDB Dual-Engine</span>
+        <span class="badge badge-primary">Streamlit</span>
+      </div>
+      <h1>Airbnb Snowflake + dbt Pipeline</h1>
+      <p>
+        An enterprise-grade Analytics Engineering portfolio project transforming raw Inside Airbnb datasets 
+        into high-performance dimensional star-schemas and monthly aggregates, backed by automated data tests 
+        and an interactive BI reporting dashboard.
+      </p>
+    </div>
+
+    <!-- Section 1: Overview -->
+    <section id="overview">
+      <h2>📌 Executive Overview</h2>
+      <p>
+        This project simulates a production modern data stack workflow. It implements complete ELT (Extract, Load, Transform) 
+        pipelines with dual execution compatibility: run on enterprise cloud <strong>Snowflake</strong> or 100% locally and free 
+        using <strong>DuckDB</strong> with zero cloud fees.
+      </p>
+
+      <div class="grid-3">
+        <div class="card">
+          <h4>📥 Robust Raw Ingestion</h4>
+          <p>Loads text-preserving CSV & GZIP files to Snowflake stages or DuckDB without pre-transforming, ensuring clean ELT separation.</p>
+        </div>
+        <div class="card">
+          <h4>📐 Layered dbt Modeling</h4>
+          <p>Four distinct modeling tiers: Raw Sources, Staging (cleaning & casting), Intermediate (joins & revenue proxies), and Marts.</p>
+        </div>
+        <div class="card">
+          <h4>⚡ Incremental Processing</h4>
+          <p>Utilizes Snowflake <code>merge</code> incremental strategy on the listing calendar fact model to scale smoothly with snapshot updates.</p>
+        </div>
+        <div class="card">
+          <h4>🛡️ Automated Testing</h4>
+          <p>Comprehensive generic and singular SQL tests enforcing primary key uniqueness, foreign key relationships, and positive pricing.</p>
+        </div>
+        <div class="card">
+          <h4>📊 Real-time Dashboard</h4>
+          <p>Interactive Streamlit BI dashboard computing KPIs, occupancy trends, host metrics, and neighborhood revenue distributions.</p>
+        </div>
+        <div class="card">
+          <h4>🆓 Zero-Cost DuckDB Mode</h4>
+          <p>Custom SQL compatibility macros allowing full project execution on your laptop without needing a Snowflake trial or credit card.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Background -->
+    <section id="background">
+      <h2>📖 Project Background & Dataset</h2>
+      <p>
+        The data originates from <strong>Inside Airbnb</strong>, an independent open-data platform that publishes web-scraped 
+        data on Airbnb listings around the world under the Creative Commons Attribution 4.0 license.
+      </p>
+
+      <div class="callout callout-info">
+        <div class="callout-title">ℹ️ Bundled City Snapshot: Albany, New York</div>
+        <p>The repository ships with bundled data from Albany, NY (September 14, 2026 snapshot), featuring <strong>500 listings</strong>, <strong>182,500 calendar rows</strong>, and <strong>30,251 customer reviews</strong>. Any city data from Inside Airbnb with identical headers can be dropped in seamlessly.</p>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>File Name</th>
+              <th>Format</th>
+              <th>Volume</th>
+              <th>Core Business Information</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>listings.csv.gz</code></td>
+              <td>Gzip CSV</td>
+              <td>500 rows</td>
+              <td>Listing metadata, host bio, property type, room classification, baseline nightly rate, location, rating scores.</td>
+            </tr>
+            <tr>
+              <td><code>calendar.csv.gz</code></td>
+              <td>Gzip CSV</td>
+              <td>182,500 rows</td>
+              <td>Day-by-day availability flags, dynamic prices, adjusted prices, minimum/maximum stay limits for 365 future dates.</td>
+            </tr>
+            <tr>
+              <td><code>reviews.csv.gz</code></td>
+              <td>Gzip CSV</td>
+              <td>30,251 rows</td>
+              <td>Guest review history, timestamp, reviewer profile id, guest review comments.</td>
+            </tr>
+            <tr>
+              <td><code>neighbourhoods.csv</code></td>
+              <td>Plain CSV</td>
+              <td>Reference</td>
+              <td>Authoritative boundary list of municipal reporting neighborhoods and neighborhood groups.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-warning">
+        <div class="callout-title">⚠️ The Revenue Proxy Methodology</div>
+        <p>Because Inside Airbnb scrapes publicly visible web pages, actual guest transactions and financial checkout ledgers are not public. As is standard in analytics portfolios, this project models an <strong>unavailable-night revenue proxy</strong>: when a calendar day is marked unavailable (<code>is_available = false</code>), we estimate booking revenue using the effective daily price.</p>
+      </div>
+    </section>
+
+    <!-- Section 3: Architecture -->
+    <section id="architecture">
+      <h2>🏗️ Architecture & Pipeline Flow</h2>
+      <p>Data progresses systematically through the Modern Data Stack layers:</p>
+
+      <div class="arch-flow">
+        <div class="flow-steps">
+          
+          <div class="flow-node raw">
+            <div class="node-title">1. Raw Zone (Data Storage)</div>
+            <div class="node-desc">
+              Snowflake internal stage <code>RAW.INSIDE_AIRBNB_STAGE</code> or DuckDB table creation &bull; 
+              Raw files loaded directly with all fields preserved as strings (<code>VARCHAR</code>) to prevent ingestion failures.
+            </div>
+          </div>
+
+          <div class="flow-arrow-down">&darr;</div>
+
+          <div class="flow-node staging">
+            <div class="node-title">2. dbt Staging Layer (Views)</div>
+            <div class="node-desc">
+              <code>stg_airbnb__listings</code>, <code>stg_airbnb__calendar</code>, <code>stg_airbnb__reviews</code>, <code>stg_airbnb__neighbourhoods</code> &bull;
+              String cleaning (regex for currency <code>$120.00 &rarr; 120.00</code>), percent casts, boolean standardization, column renaming.
+            </div>
+          </div>
+
+          <div class="flow-arrow-down">&darr;</div>
+
+          <div class="flow-node intermediate">
+            <div class="node-title">3. dbt Intermediate Layer (Views)</div>
+            <div class="node-desc">
+              <code>int_airbnb__listing_enriched</code>, <code>int_airbnb__calendar_enriched</code>, <code>int_airbnb__reviews_enriched</code> &bull;
+              Reporting neighborhood coalescing, price categorization (Budget/Mid/Upscale), host tenure calculation, daily revenue proxy estimation.
+            </div>
+          </div>
+
+          <div class="flow-arrow-down">&darr;</div>
+
+          <div class="flow-node marts">
+            <div class="node-title">4. dbt Analytics Marts Layer (Tables)</div>
+            <div class="node-desc">
+              <strong>Dimensions:</strong> <code>dim_listings</code>, <code>dim_hosts</code> &bull; 
+              <strong>Facts:</strong> <code>fct_listing_calendar</code> (incremental merge), <code>fct_reviews</code> &bull; 
+              <strong>Aggregates:</strong> <code>agg_listing_monthly_performance</code>, <code>agg_neighbourhood_monthly_performance</code>.
+            </div>
+          </div>
+
+          <div class="flow-arrow-down">&darr;</div>
+
+          <div class="flow-node bi">
+            <div class="node-title">5. Consumption & BI (Streamlit App)</div>
+            <div class="node-desc">
+              Interactive browser app (<code>dashboard/streamlit_app.py</code>) running cached SQL queries against the Marts layer for neighborhood comparisons and KPI tracking.
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: dbt Layers -->
+    <section id="dbt-layers">
+      <h2>⚙️ dbt Model Layers & Data Models</h2>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Model Name</th>
+              <th>Layer</th>
+              <th>Materialization</th>
+              <th>Grain & Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>stg_airbnb__listings</code></td>
+              <td>Staging</td>
+              <td>View</td>
+              <td>1 row per raw listing. Parses price, room classification, host info, and rating stats.</td>
+            </tr>
+            <tr>
+              <td><code>stg_airbnb__calendar</code></td>
+              <td>Staging</td>
+              <td>View</td>
+              <td>1 row per listing per date. Converts string boolean availability to SQL boolean.</td>
+            </tr>
+            <tr>
+              <td><code>stg_airbnb__reviews</code></td>
+              <td>Staging</td>
+              <td>View</td>
+              <td>1 row per review. Cleans review timestamps and strings.</td>
+            </tr>
+            <tr>
+              <td><code>stg_airbnb__neighbourhoods</code></td>
+              <td>Staging</td>
+              <td>View</td>
+              <td>1 row per unique neighbourhood. Drops blank source rows.</td>
+            </tr>
+            <tr>
+              <td><code>int_airbnb__listing_enriched</code></td>
+              <td>Intermediate</td>
+              <td>View</td>
+              <td>Enriches listings with authoritative reporting neighborhoods and price bands.</td>
+            </tr>
+            <tr>
+              <td><code>int_airbnb__calendar_enriched</code></td>
+              <td>Intermediate</td>
+              <td>View</td>
+              <td>Combines calendar dates with base prices; derives <code>estimated_unavailable_night_revenue</code>.</td>
+            </tr>
+            <tr>
+              <td><code>int_airbnb__reviews_enriched</code></td>
+              <td>Intermediate</td>
+              <td>View</td>
+              <td>Denormalizes listing details into reviews and computes comment length.</td>
+            </tr>
+            <tr>
+              <td><code>dim_listings</code></td>
+              <td>Marts</td>
+              <td>Table</td>
+              <td><strong>Dimension table</strong>: Listing master with host details, property attributes, price tier.</td>
+            </tr>
+            <tr>
+              <td><code>dim_hosts</code></td>
+              <td>Marts</td>
+              <td>Table</td>
+              <td><strong>Dimension table</strong>: Host profile master with total managed listings, average portfolio price, reviews.</td>
+            </tr>
+            <tr>
+              <td><code>fct_listing_calendar</code></td>
+              <td>Marts</td>
+              <td>Table (Incremental)</td>
+              <td><strong>Fact table</strong>: 1 row per listing per day. Tracks daily availability and revenue proxy.</td>
+            </tr>
+            <tr>
+              <td><code>fct_reviews</code></td>
+              <td>Marts</td>
+              <td>Table</td>
+              <td><strong>Fact table</strong>: 1 row per guest review with associated metadata.</td>
+            </tr>
+            <tr>
+              <td><code>agg_listing_monthly_performance</code></td>
+              <td>Marts</td>
+              <td>Table</td>
+              <td><strong>Aggregate table</strong>: Listing-month summary (occupancy rates, active days, revenue).</td>
+            </tr>
+            <tr>
+              <td><code>agg_neighbourhood_monthly_performance</code></td>
+              <td>Marts</td>
+              <td>Table</td>
+              <td><strong>Aggregate table</strong>: Neighborhood-month summary designed for high-speed dashboard reporting.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Reusable Macros (<code>macros/</code>)</h3>
+      <div class="grid-3">
+        <div class="card">
+          <h4><code>clean_price(col)</code></h4>
+          <p>Uses regex to strip currency symbols (<code>$</code>, <code>,</code>) and casts safe numeric decimals (<code>18,2</code>).</p>
+        </div>
+        <div class="card">
+          <h4><code>clean_percent(col)</code></h4>
+          <p>Parses percentage strings (e.g., <code>"95%"</code>) into mathematical decimal ratios (<code>0.95</code>).</p>
+        </div>
+        <div class="card">
+          <h4><code>duckdb_compat()</code></h4>
+          <p>Defines Snowflake-specific SQL functions (like <code>try_to_decimal</code>) inside DuckDB automatically on run start.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: Data Quality -->
+    <section id="data-quality">
+      <h2>🛡️ Testing & Data Quality Framework</h2>
+      <p>Data integrity is guarded through two types of automated dbt tests:</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <h4>Generic Schema Tests (YAML)</h4>
+          <ul style="margin-left: 1.25rem; font-size: 0.85rem; color: #94a3b8; display: flex; flex-direction: column; gap: 0.4rem;">
+            <li><code>not_null</code>: Checked on primary keys (<code>listing_id</code>, <code>review_id</code>, <code>calendar_date</code>).</li>
+            <li><code>unique</code>: Enforced on all primary dimension identifiers.</li>
+            <li><code>relationships</code>: Foreign key checks verifying that calendar & reviews link to valid listing IDs.</li>
+            <li><code>accepted_values</code>: Room types must strictly belong to standard Airbnb categories.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>Singular Custom SQL Tests (<code>tests/</code>)</h4>
+          <ul style="margin-left: 1.25rem; font-size: 0.85rem; color: #94a3b8; display: flex; flex-direction: column; gap: 0.4rem;">
+            <li><code>assert_non_negative_prices.sql</code>: Fails if nightly price in dimensions or calendar facts drops below 0.</li>
+            <li><code>assert_no_duplicate_listing_calendar.sql</code>: Verifies that no listing has duplicate dates in the calendar fact table.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 6: Step-by-Step Setup -->
+    <section id="setup-guide">
+      <h2>🚀 Step-by-Step Setup Guide</h2>
+      <p>Choose your preferred execution path below:</p>
+
+      <div class="tab-container">
+        <div class="tab-nav">
+          <button class="tab-btn active" onclick="switchTab('tab-duckdb')">Option A: Local DuckDB (100% Free & Offline)</button>
+          <button class="tab-btn" onclick="switchTab('tab-snowflake')">Option B: Snowflake Cloud Production</button>
+        </div>
+
+        <!-- Tab 1: DuckDB -->
+        <div id="tab-duckdb" class="tab-pane active">
+          <div class="callout callout-success">
+            <div class="callout-title">💡 Why Choose the DuckDB Path?</div>
+            <p>Requires no account, no credit card, and zero cloud configuration. Everything runs completely on your computer inside a fast, embedded analytical database (<code>airbnb.duckdb</code>).</p>
+          </div>
+
+          <h3>1. Open PowerShell & Navigate to Project</h3>
+          <div class="code-block">
+            <div class="code-header">
+              <span>PowerShell</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre><code>cd "D:\Avnish\Avnish DE Projects\Snowflake_DBT_Project"</code></pre>
+          </div>
+
+          <h3>2. Set Up Python Virtual Environment</h3>
+          <div class="code-block">
+            <div class="code-header">
+              <span>PowerShell</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre><code># Enable script execution if restricted
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned -Force
+
+# Create and activate virtual environment
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+
+# Install lightweight DuckDB dependencies
+pip install -r requirements-duckdb.txt</code></pre>
+          </div>
+
+          <h3>3. Initialize dbt Profile & Load Data</h3>
+          <div class="code-block">
+            <div class="code-header">
+              <span>PowerShell</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre><code># Copy profile configuration
+Copy-Item profiles.yml.example profiles.yml
+
+# Ingest the 4 raw files directly into local DuckDB
+python scripts/load_inside_airbnb_to_duckdb.py</code></pre>
+          </div>
+
+          <h3>4. Build All Models & Run Tests</h3>
+          <div class="code-block">
+            <div class="code-header">
+              <span>PowerShell</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre><code># Build dbt models (runs transformations + automated tests in one step)
+dbt build --target duckdb --profiles-dir .
+
+# Run the automated build verification script
+python scripts/verify_duckdb_build.py</code></pre>
+          </div>
+
+          <h3>5. Launch the Visual Streamlit Dashboard</h3>
+          <div class="code-block">
+            <div class="code-header">
+              <span>PowerShell</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre><code>streamlit run dashboard/streamlit_app.py</code></pre>
+          </div>
+        </div>
+
+        <!-- Tab 2: Snowflake -->
+        <div id="tab-snowflake" class="tab-pane">
+          <div class="callout callout-info">
+            <div class="callout-title">☁️ Snowflake Account Requirements</div>
+            <p>You will need a Snowflake account (a 30-day free trial works) with <code>ACCOUNTADMIN</code> access.</p>
+          </div>
+
+          <h3>1. Execute Initial Snowflake DDL</h3>
+          <p>Open Snowsight (Snowflake Web Console) and execute the SQL script located in <span class="inline-code">setup/snowflake_setup.sql</span>. This creates:</p>
+          <ul style="margin-left: 1.5rem; font-size: 0.88rem; color: #94a3b8;">
+            <li>Database: <code>AIRBNB_ANALYTICS</code></li>
+            <li>Warehouse: <code>COMPUTE_WH</code> (size XSMALL, auto-suspend 60s)</li>
+            <li>Schemas: <code>RAW</code>, <code>STAGING</code>, <code>INTERMEDIATE</code>, <code>ANALYTICS</code></li>
+            <li>Internal Stage: <code>RAW.INSIDE_AIRBNB_STAGE</code> and CSV file format</li>
+          </ul>
+
+          <h3>2. Set Up Virtual Environment & Credentials</h3>
+          <div class="code-block">
+            <div class="code-header">
+              <span>PowerShell</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre><code>cd "D:\Avnish\Avnish DE Projects\Snowflake_DBT_Project"
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+
+# Create local configuration files from examples
+Copy-Item profiles.yml.example profiles.yml
+Copy-Item config\local_credentials.example.json config\local_credentials.json</code></pre>
+          </div>
+
+          <h3>3. Populate Credentials</h3>
+          <p>Edit <span class="inline-code">profiles.yml</span> and <span class="inline-code">config/local_credentials.json</span> with your Snowflake account identifier, username, and password.</p>
+
+          <h3>4. Upload Raw Data & Run Pipeline</h3>
+          <div class="code-block">
+            <div class="code-header">
+              <span>PowerShell</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre><code># Upload files to stage and populate RAW schema
+python scripts/load_inside_airbnb_to_snowflake.py
+
+# Verify dbt connection
+dbt debug --profiles-dir .
+
+# Run transformations and tests
+dbt run --profiles-dir .
+dbt test --profiles-dir .
+
+# Start dashboard reading from Snowflake
+streamlit run dashboard/streamlit_app.py</code></pre>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Section 7: Command Reference -->
+    <section id="commands">
+      <h2>💻 Common dbt & CLI Commands</h2>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Task</th>
+              <th>Snowflake Command</th>
+              <th>DuckDB Command</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Test Connection</td>
+              <td><code>dbt debug --profiles-dir .</code></td>
+              <td><code>dbt debug --target duckdb --profiles-dir .</code></td>
+            </tr>
+            <tr>
+              <td>Run All Models</td>
+              <td><code>dbt run --profiles-dir .</code></td>
+              <td><code>dbt run --target duckdb --profiles-dir .</code></td>
+            </tr>
+            <tr>
+              <td>Run All Tests</td>
+              <td><code>dbt test --profiles-dir .</code></td>
+              <td><code>dbt test --target duckdb --profiles-dir .</code></td>
+            </tr>
+            <tr>
+              <td>Build (Run + Test)</td>
+              <td><code>dbt build --profiles-dir .</code></td>
+              <td><code>dbt build --target duckdb --profiles-dir .</code></td>
+            </tr>
+            <tr>
+              <td>Run Single Model</td>
+              <td><code>dbt run --select dim_listings --profiles-dir .</code></td>
+              <td><code>dbt run --select dim_listings --target duckdb --profiles-dir .</code></td>
+            </tr>
+            <tr>
+              <td>Incremental Full Refresh</td>
+              <td><code>dbt run --full-refresh --select fct_listing_calendar+ --profiles-dir .</code></td>
+              <td><code>dbt run --full-refresh --select fct_listing_calendar+ --target duckdb --profiles-dir .</code></td>
+            </tr>
+            <tr>
+              <td>Generate & View Docs</td>
+              <td colspan="2"><code>dbt docs generate --profiles-dir . && dbt docs serve</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 8: Dashboard -->
+    <section id="dashboard">
+      <h2>📊 Streamlit BI Dashboard</h2>
+      <p>
+        The interactive web interface in <span class="inline-code">dashboard/streamlit_app.py</span> delivers 
+        real-time visual intelligence on the Airbnb marketplace:
+      </p>
+
+      <div class="grid-2">
+        <div class="card">
+          <h4>Key Executive Metrics</h4>
+          <ul style="margin-left: 1.25rem; font-size: 0.85rem; color: #94a3b8;">
+            <li><strong>Total Market Listings</strong> (deduplicated across regions)</li>
+            <li><strong>Average Nightly Listing Price</strong></li>
+            <li><strong>Overall Calendar Availability Rate</strong> (%)</li>
+            <li><strong>Total Estimated Unavailable-Night Revenue</strong></li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>Interactive Visual Analytics</h4>
+          <ul style="margin-left: 1.25rem; font-size: 0.85rem; color: #94a3b8;">
+            <li><strong>Neighborhood Filter</strong>: Interactive multi-select sidebar filter</li>
+            <li><strong>Revenue by Neighborhood</strong>: Altair horizontal bar chart ranking top earning areas</li>
+            <li><strong>Price vs. Availability Matrix</strong>: Monthly trend distributions</li>
+            <li><strong>Top Host Portfolios</strong>: Listings count and review density per host</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 9: Business Insights -->
+    <section id="business-questions">
+      <h2>💡 Example Business Analytics Queries</h2>
+      <p>
+        The <span class="inline-code">analyses/example_business_questions.sql</span> file contains SQL queries solving 
+        key business dilemmas directly against the marts layer:
+      </p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span>SQL (Marts Layer Queries)</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code>-- 1. Which neighbourhoods generate the highest estimated revenue?
+select
+    reporting_neighbourhood,
+    sum(estimated_unavailable_revenue) as total_estimated_revenue
+from {{ ref('agg_neighbourhood_monthly_performance') }}
+group by reporting_neighbourhood
+order by total_estimated_revenue desc;
+
+-- 2. Which room types have the highest average nightly rate?
+select
+    room_type,
+    avg(effective_nightly_price) as avg_price
+from {{ ref('fct_listing_calendar') }}
+group by room_type
+order by avg_price desc;
+
+-- 3. Who are the top 10 most influential hosts by portfolio size?
+select
+    host_id,
+    host_name,
+    listing_count,
+    avg_nightly_price,
+    total_reviews
+from {{ ref('dim_hosts') }}
+order by listing_count desc
+limit 10;</code></pre>
+      </div>
+    </section>
+
+    <!-- Section 10: Troubleshooting -->
+    <section id="troubleshooting">
+      <h2>🔧 Troubleshooting & FAQ</h2>
+
+      <div class="callout callout-warning">
+        <div class="callout-title">⚠️ PowerShell: "Running scripts is disabled on this system"</div>
+        <p>Windows defaults to restricted script execution. Fix it permanently for your user account by running:<br>
+        <code>Set-ExecutionPolicy -Scope CurrentUser RemoteSigned -Force</code></p>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-title">ℹ️ Why run `--full-refresh` on new data snapshots?</div>
+        <p><code>fct_listing_calendar</code> is an incremental model using Snowflake's <code>merge</code> strategy. If you load a new dataset snapshot without <code>--full-refresh</code>, old dates remain alongside new dates, multiplying row counts. Full refresh drops and rebuilds the fact table cleanly.</p>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-title">🔒 Git & Security Safeguards</div>
+        <p><code>profiles.yml</code> and <code>config/local_credentials.json</code> are pre-configured in <code>.gitignore</code>. Never commit your Snowflake passwords, account numbers, or private API keys to GitHub.</p>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div>Airbnb Analytics Engineering Project &bull; Avnish Sharma Portfolio</div>
+      <div>Snowflake &bull; dbt Core &bull; DuckDB &bull; Streamlit</div>
+    </footer>
+
+  </main>
+
+  <script>
+    // Tab switching functionality
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+      
+      event.target.classList.add('active');
+      const targetPane = document.getElementById(tabId);
+      if (targetPane) {
+        targetPane.classList.add('active');
+      }
+    }
+
+    // Code copy button
+    function copyCode(btn) {
+      const code = btn.closest('.code-block').querySelector('pre code').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        const originalText = btn.innerText;
+        btn.innerText = 'Copied!';
+        btn.style.backgroundColor = '#10b981';
+        btn.style.color = '#fff';
+        setTimeout(() => {
+          btn.innerText = originalText;
+          btn.style.backgroundColor = '';
+          btn.style.color = '';
+        }, 2000);
+      });
+    }
+
+    // Smooth scroll active state highlighting
+    window.addEventListener('DOMContentLoaded', () => {
+      const links = document.querySelectorAll('nav.toc a');
+      const sections = document.querySelectorAll('section');
+
+      window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop;
+          if (pageYOffset >= sectionTop - 120) {
+            current = section.getAttribute('id');
+          }
+        });
+
+        links.forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === `#${current}`) {
+            link.classList.add('active');
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
